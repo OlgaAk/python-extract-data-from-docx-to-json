@@ -40,8 +40,31 @@ def getJsonName():
 
 
 def sortByDocNumber(doc):
-    print(doc["number"])
     return doc["number"]
+
+
+def getMissingDocuments(docArray):
+    firstDocNumber = docArray[0]["number"]
+    lastDocNumber = docArray[-1]["number"]+1
+    totalDocumentShouldCount = lastDocNumber - firstDocNumber
+    missingDocuments = list(range(firstDocNumber, lastDocNumber))
+    missingDocumentCount = totalDocumentShouldCount - len(docArray)
+    for doc in docArray:
+        missingDocuments.remove(doc["number"])
+    return missingDocuments, missingDocumentCount, totalDocumentShouldCount
+
+
+def prepareFinalData(documents, resultArray):
+    missingDocuments, missingDocumentCount, totalDocumentShouldCount = getMissingDocuments(
+        resultArray)
+    return {
+        "documentsCount": len(documents),
+        "processedDocumentsCount": len(resultArray),
+        "totalDocumentShouldCount": totalDocumentShouldCount,
+        "missingDocumentCount": missingDocumentCount,
+        "missingDocuments": missingDocuments,
+        "result": resultArray
+    }
 
 
 def extractDataFromDocxsToJson():
@@ -56,16 +79,7 @@ def extractDataFromDocxsToJson():
     resultArray.sort(key=sortByDocNumber)
     for index, item in enumerate(resultArray):
         item["index"] = index
-    totalDocumentShouldCount = (
-        resultArray[-1]["number"] - resultArray[0]["number"])
-    missingDocumentCount = totalDocumentShouldCount - len(documents)
-    saveDataToJson(jsonName, {
-        "documentsCount": len(documents),
-        "processedDocumentsCount": len(resultArray),
-        "totalDocumentShouldCount": totalDocumentShouldCount,
-        "missingDocumentCount": missingDocumentCount,
-        "result": resultArray
-    })
+    saveDataToJson(jsonName, prepareFinalData(documents, resultArray))
 
 
 extractDataFromDocxsToJson()
